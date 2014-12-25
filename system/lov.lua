@@ -108,6 +108,9 @@ end
 			Return: nil
 ]]
 function love.keypressed(key, rep)
+	if(key == " ")then
+		key = "space";
+	end
 	event.triggerEvent("onClientKey", key, "down", rep);
 end
 
@@ -119,6 +122,9 @@ end
 			Return: nil
 ]]
 function love.keyreleased(key)
+	if(key == " ")then
+		key = "space";
+	end
 	event.triggerEvent("onClientKey", key, "up", nil);
 end
 
