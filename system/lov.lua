@@ -75,6 +75,13 @@ end
 			Return: nil
 ]]
 function love.mousepressed(x, y, button)
+	if(button == "l") then
+		button = "left";
+	elseif(button == "r") then
+		button = "right"
+	elseif(button == "m") then
+		button = "middle";
+	end
 	event.triggerEvent("onClientClick", button, "down", x, y);
 end
 
@@ -86,6 +93,13 @@ end
 			Return: nil
 ]]
 function love.mousereleased(x, y, button)
+	if(button == "l") then
+		button = "left";
+	elseif(button == "r") then
+		button = "right"
+	elseif(button == "m") then
+		button = "middle";
+	end
 	event.triggerEvent("onClientClick", button, "up", x, y);
 end
 
