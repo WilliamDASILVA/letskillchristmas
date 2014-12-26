@@ -29,4 +29,15 @@ function System.setMousePosition(x, y)
 	love.mouse.setPosition(x, y);
 end
 
+--[[
+			[function] System.getScreenSize()
+	
+			* Return the screen size *
+	
+			Return: x, y
+]]
+function System.getScreenSize()
+	return love.graphics.getDimensions();
+end
+
 return System;
