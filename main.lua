@@ -15,22 +15,23 @@ require("system.include");
 player = require("gameplay.player");
 bullet = require("gameplay.bullet");
 score = require("gameplay.score");
+hud = require("interface.hud");
+menu = require("interface.menu");
 
 love.window.setMode(780,600);
 
+-- global tables
 bullets = {}
 enemies = {}
+explosions = {}
 
 
-me = player.new();
-me:setSize(64);
+
 me_sprite = sprite.create("files/images/ship.png", 32, 3);
-santa = sprite.create("files/images/santa.png", 32, 4);
+santa = sprite.create("files/images/santa.png", 32, 1);
 balle = sprite.create("files/images/bullet.png", 32, 3);
-me:setPosition(50,50);
 points = score.new();
 
-explosions = {}
 
 -- stars
 stars = {}
@@ -45,29 +46,45 @@ for i=0, 10 do
 end
 
 -- sounds
-throw = love.audio.newSource("files/sounds/shot.ogg");
-spash = love.audio.newSource("files/sounds/splash.ogg");
-soundtrack = love.audio.newSource("files/sounds/soundtrack.ogg");
+soundtrack = love.audio.newSource("files/sounds/ingame_soundtrack.ogg");
 boo = love.audio.newSource("files/sounds/boo.mp3");
 
+
+-- global vars
 isGameOver = false;
+spawningTimer = nil;
 
 --[[
 	-------------------------------
 		Game
 	-------------------------------
 ]]
-function startGame()
-	--love.audio.play(soundtrack);
 
+function startGame()
+	love.audio.play(soundtrack);
+	time.setTimer(5333, 0, "soundTrackLoop");
+
+	me = player.new();
+	me:setSize(64);
+	me:setPosition(50,50);
+	me:setHealth(100);
 
 	event.addEventHandler("onClientUpdate", "updating");
 	event.addEventHandler("onClientUpdate", "col");
 	event.addEventHandler("onClientRender", "rendering");
-	time.setTimer(3000,1, "startSpawning");
 	event.addEventHandler("onClientRender", "renderingExplosion");
+
+	spawningTimer = time.setTimer(3000,1, "startSpawning");
 end
-startGame();
+
+function soundTrackLoop()
+	if not isGameOver then
+		--love.audio.rewind(soundtrack);
+		love.audio.play(soundtrack);
+	end
+end
+menu.start();
+
 
 --[[
 	-------------------------------
@@ -163,7 +180,6 @@ function col()
 					local dmg = bullet:getDamage();
 					mob:setHealth(health - dmg);
 					createExplosion(mX, mY, 1);
-					love.audio.play(spash);
 
 					if mob:getHealth() <= 0 then
 						createExplosion(mX, mY, 3);
@@ -253,6 +269,7 @@ function keyboard(button, state)
 				local b = bullet.new(x+me:getSize(), y+25, "right", 20);
 				table.insert(bullets, b);
 				me:setAmmo(ammo - 1);
+				local throw = love.audio.newSource("files/sounds/shooting.ogg");
 				love.audio.play(throw);
 			end
 		end
@@ -266,7 +283,6 @@ event.addEventHandler("onClientKey", "keyboard");
 	-------------------------------
 ]]
 local spawningTime = 3000;
-local spawningTimer = nil;
 function spawnMob()
 	if not isGameOver then
 		if spawningTime > 1000 then
@@ -302,11 +318,6 @@ function checkForHealth()
 		createExplosion(x-50, y, 5);
 		createExplosion(x-50, y-50, 5);
 		createExplosion(x, y-50, 5);
-
-		event.removeEventHandler("onClientKey", "keyboard");
-		event.removeEventHandler("onClientRender", "rendering");
-		event.removeEventHandler("onClientUpdate", "col");
-		event.removeEventHandler("onClientUpdate", "updating");
 	end
 end
 
@@ -353,6 +364,8 @@ function createExplosion(x, y, size)
 	t.size = size;
 	t.sprite = sprite.create("files/images/explosion.png", 32, 7);
 	table.insert(explosions, t);
+	local spash = love.audio.newSource("files/sounds/explosion.ogg");
+	love.audio.play(spash);
 
 end
 
@@ -382,42 +395,38 @@ end
 		User interface
 	-------------------------------
 ]]
-local ammo_image = love.graphics.newImage("files/images/ammo.png");
-local pts_image = love.graphics.newImage("files/images/points.png");
-local health_image = love.graphics.newImage("files/images/health.png");
 local gameover = love.graphics.newImage("files/images/gameover.png");
+local btn_retry = love.graphics.newImage("files/images/btn_retry.png");
 local isGameOverDone = false;
 function ui()
-	-- health bar
-	local health = me:getHealth();
-	love.graphics.draw(health_image, 70, 10);
-	love.graphics.print(health.."%", 110, 20);
-
-	local ammo = me:getAmmo();
-	love.graphics.draw(ammo_image, 10, 10);
-	love.graphics.print(ammo, 45, 20);
-
-	local pts = points:getPoints();
-	love.graphics.draw(pts_image, 150, 10);
-	love.graphics.print(pts, 185, 20);
-
+	local screenX, screenY = system.getScreenSize();
 	-- is game over?
 	if isGameOver then
 		if not isGameOverDone then
 			event.triggerEvent("onGameOver");
 			isGameOverDone = true;
 		end
-		love.graphics.draw(gameover, 780/2-100, 600/2-100, 0, 2, 2);
-		love.graphics.print("Points: "..pts, 780/2-50, 600/2+50, 0, 2, 2);
+		local pts = points:getPoints();
+		love.graphics.draw(gameover, screenX/2-100, screenY/2-100, 0, 2, 2);
+		love.graphics.print("Points: "..pts, screenX/2-50, screenY/2+50, 0, 2, 2);
 	end
-
 end
 event.addEventHandler("onClientRender", "ui");
 
+function quitGame()
+	love.event.quit();
+end
 
 function lose()
+	event.removeEventHandler("onClientKey", "keyboard");
+	event.removeEventHandler("onClientRender", "rendering");
+	event.removeEventHandler("onClientUpdate", "col");
+	event.removeEventHandler("onClientUpdate", "updating");
+
 	love.audio.stop(soundtrack);
 	love.audio.play(boo);
+
+	time.setTimer(5000, 1, "quitGame");
 end
 event.addEvent("onGameOver");
 event.addEventHandler("onGameOver", "lose");
