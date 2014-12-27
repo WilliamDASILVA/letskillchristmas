@@ -295,6 +295,7 @@ function spawnMob()
 		local mob = player.new();
 		mob:setPosition(800, math.random(0,550))
 		mob:setHealth(50);
+		mob:setSpeed(math.random(2,6));
 		table.insert(enemies, mob);
 	end
 end

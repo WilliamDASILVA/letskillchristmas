@@ -63,10 +63,12 @@ function MenuRender()
 	if Menu.isActive then
 		love.graphics.draw(Menu.logo, screenX/4-(575/4), 100, 0, 0.5, 0.5);
 		love.graphics.draw(Menu.infos, screenX-300, screenY-300);
+		love.graphics.print("© William DA SILVA - www.williamdasilva.fr", 50, screenY-45);
 
 		-- drawing buttons
 		love.graphics.draw(Menu.btn_play, 50, screenY-160);
 		love.graphics.draw(Menu.btn_quit, 50, screenY-100);
+
 	end
 
 end

@@ -25,7 +25,7 @@ function Player.new()
 		['direction'] = nil,
 		['active'] = true,
 		['size'] = 50,
-		['speed'] = math.random(1,10)
+		['speed'] = 0
 	}
 
 	setmetatable(obj, Player);
@@ -41,6 +41,17 @@ end
 ]]
 function Player:getSpeed()
 	return self.speed;
+end
+
+--[[
+			[function] Player:setSpeed(speed)
+	
+			* Set mob speed *
+	
+			Return: nil
+]]
+function Player:setSpeed(speed)
+	self.speed = speed;
 end
 
 --[[
