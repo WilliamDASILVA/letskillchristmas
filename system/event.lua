@@ -87,14 +87,12 @@ end
 			Return: true, false
 ]]
 function Event.removeEventHandler(eventName, functionCalled)
-	if eventName and functionToCall then
+	if eventName and functionCalled then
 		for i, e in ipairs(Event.events)do
 			if eventName == e.name  then
 				for i, func in ipairs(e.functions)do
 					if tostring(functionCalled) == func then
 						table.remove(Event.events, i);
-
-						return true;
 					end
 				end
 			end
