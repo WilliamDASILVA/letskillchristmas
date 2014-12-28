@@ -75,6 +75,7 @@ function startGame()
 	event.addEventHandler("onClientUpdate", "col");
 	event.addEventHandler("onClientRender", "rendering");
 	event.addEventHandler("onClientRender", "renderingExplosion");
+	event.addEventHandler("onClientKey", "keyboard");
 
 	spawningTimer = time.setTimer(3000,1, "startSpawning");
 end
@@ -277,7 +278,6 @@ function keyboard(button, state)
 		end
 	end
 end
-event.addEventHandler("onClientKey", "keyboard");
 
 --[[
 	-------------------------------
