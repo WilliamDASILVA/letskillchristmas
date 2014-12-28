@@ -17,6 +17,8 @@ bullet = require("gameplay.bullet");
 score = require("gameplay.score");
 hud = require("interface.hud");
 menu = require("interface.menu");
+scoreboard = require("interface.scoreboard");
+
 
 love.window.setMode(780,600);
 
