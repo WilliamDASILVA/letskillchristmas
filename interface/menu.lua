@@ -11,6 +11,7 @@ Menu.sun_image = love.graphics.newImage("files/images/sun.png");
 Menu.infos = love.graphics.newImage("files/images/menu_tip.png");
 Menu.btn_play = love.graphics.newImage("files/images/btn_play.png");
 Menu.btn_quit = love.graphics.newImage("files/images/btn_quit.png");
+Menu.btn_score = love.graphics.newImage("files/images/btn_score.png");
 Menu.logo = love.graphics.newImage("files/images/logo.png");
 Menu.soundtrack = love.audio.newSource("files/sounds/menu_soundtrack.wav");
 Menu.soundTrackLooping = nil;
@@ -66,7 +67,8 @@ function MenuRender()
 		love.graphics.print("© William DA SILVA - www.williamdasilva.fr", 50, screenY-45);
 
 		-- drawing buttons
-		love.graphics.draw(Menu.btn_play, 50, screenY-160);
+		love.graphics.draw(Menu.btn_play, 50, screenY-220);
+		love.graphics.draw(Menu.btn_score, 50, screenY-160);
 		love.graphics.draw(Menu.btn_quit, 50, screenY-100);
 
 	end
@@ -84,14 +86,20 @@ function MenuClick(button, state, x, y)
 	if Menu.isActive then
 		local screenX, screenY = system.getScreenSize();
 		if (button == "left") and (state == "down") then
-			if(x >= 50) and (x <= 350) and (y >= screenY-160) and (y <= screenY-160+50) then
+			if(x >= 50) and (x <= 350) and (y >= screenY-220) and (y <= screenY-220+50) then
+				-- play
 				startGame();
 				HUD.start();
 				Menu.isActive = false;
 				love.audio.pause(Menu.soundtrack);
 				time.destroyTimer(Menu.soundTrackLooping);
 			elseif(x >= 50) and (x <= 350) and (y >= screenY-100) and (y <= screenY-100+50) then
+				-- quit
 				love.event.quit();
+			elseif(x >= 50) and (x <= 350) and (y >= screenY-160) and (y <= screenY-160+50) then
+				-- scoreboard
+				Menu.isActive = false;
+				scoreboard.new();
 			end
 		end
 	end
@@ -106,8 +114,8 @@ end
 ]]
 function Menu.start()
 	Menu.isActive = true;
-	Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
-	love.audio.play(Menu.soundtrack);
+	--Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
+	--love.audio.play(Menu.soundtrack);
 
 
 	-- creating buildings
@@ -125,6 +133,17 @@ function Menu.start()
 	event.addEventHandler("onClientRender", "MenuRender");
 	event.addEventHandler("onClientUpdate", "MenuUpdating");
 	event.addEventHandler("onClientClick", "MenuClick");
+end
+
+--[[
+			[function] Menu.setActive(bool)
+	
+			* Set menu active *
+	
+			Return: nil
+]]
+function Menu.setActive(bool)
+	Menu.isActive = bool;
 end
 
 function MenuSoundtrackLooping()
