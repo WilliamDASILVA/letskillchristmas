@@ -49,3 +49,16 @@ function HUD.start()
 	event.addEventHandler("onClientRender", "HUDRender");
 end
 
+--[[
+			[function] HUD.quit()
+	
+			*  *
+	
+			Return: 
+]]
+function HUD.quit()
+	HUD.isActive = false;
+	event.removeEventHandler("onClientRender", "HUDRender");
+end
+
+return HUD;

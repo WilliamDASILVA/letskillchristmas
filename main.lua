@@ -6,11 +6,14 @@
 	-------------------------------
 ]]
 
+
+
 --[[
 	-------------------------------
 		Including all the modules
 	-------------------------------
 ]]
+
 require("system.include");
 player = require("gameplay.player");
 bullet = require("gameplay.bullet");
@@ -21,31 +24,12 @@ scoreboard = require("interface.scoreboard");
 
 
 love.window.setMode(780,600);
-
--- global tables
-bullets = {}
-enemies = {}
-explosions = {}
-
-
+love.keyboard.setKeyRepeat(true)
 
 me_sprite = sprite.create("files/images/ship.png", 32, 3);
-santa = sprite.create("files/images/santa.png", 32, 1);
+santa = sprite.create("files/images/santa.png", 32, 4);
 balle = sprite.create("files/images/bullet.png", 32, 3);
-points = score.new();
-
-
--- stars
-stars = {}
 star_sprite = sprite.create("files/images/star.png", 32, 8);
-for i=0, 10 do
-	local t = {}
-	t.x = 780;
-	t.y = math.random(0,600);
-	t.speed = math.random(1,8);
-
-	table.insert(stars, t);
-end
 
 -- sounds
 soundtrack = love.audio.newSource("files/sounds/ingame_soundtrack.ogg");
@@ -55,6 +39,12 @@ boo = love.audio.newSource("files/sounds/boo.mp3");
 -- global vars
 isGameOver = false;
 spawningTimer = nil;
+soundtLoop = nil;
+explosionTimer = nil;
+
+f_small = love.graphics.newFont(12);
+f_normal = love.graphics.newFont(15);
+f_huge = love.graphics.newFont(20);
 
 --[[
 	-------------------------------
@@ -63,30 +53,72 @@ spawningTimer = nil;
 ]]
 
 function startGame()
+
+	-- global tables
+	bullets = {}
+	enemies = {}
+	explosions = {}
+
+	-- stars
+	stars = {}
+	for i=0, 10 do
+		local t = {}
+		t.x = 780;
+		t.y = math.random(0,600);
+		t.speed = math.random(1,8);
+
+		table.insert(stars, t);
+	end
+
 	love.audio.play(soundtrack);
-	time.setTimer(5333, 0, "soundTrackLoop");
 
 	me = player.new();
 	me:setSize(64);
 	me:setPosition(50,50);
 	me:setHealth(100);
 
+	points = score.new();
+
+
 	event.addEventHandler("onClientUpdate", "updating");
 	event.addEventHandler("onClientUpdate", "col");
 	event.addEventHandler("onClientRender", "rendering");
 	event.addEventHandler("onClientRender", "renderingExplosion");
 	event.addEventHandler("onClientKey", "keyboard");
+	event.addEventHandler("onClientRender", "ui");
 
 	spawningTimer = time.setTimer(3000,1, "startSpawning");
+	explosionTimer = time.setTimer(80, 0, "changeImageExplosion");
+	soundtLoop = time.setTimer(5333, 0, "soundTrackLoop");
+
+	spawningTime = 3000;
+
+
 end
 
 function soundTrackLoop()
 	if not isGameOver then
-		--love.audio.rewind(soundtrack);
 		love.audio.play(soundtrack);
 	end
 end
+
+---
 menu.start();
+---
+
+function stopGame()
+	event.removeEventHandler("onClientUpdate", "updating");
+	event.removeEventHandler("onClientUpdate", "col");
+	event.removeEventHandler("onClientRender", "rendering");
+	event.removeEventHandler("onClientRender", "renderingExplosion");
+	event.removeEventHandler("onClientKey", "keyboard");
+
+	love.audio.pause(soundtrack);
+
+	time.destroyTimer(spawningTimer);
+	time.destroyTimer(soundtLoop);
+	time.destroyTimer(explosionTimer);
+end
 
 
 --[[
@@ -147,6 +179,9 @@ function updating()
 				end
 			end
 		end
+
+		-- check for player's health
+		checkForHealth();
 	end
 end
 
@@ -168,7 +203,6 @@ function col()
 				table.remove(enemies, i);
 				local health = me:getHealth();
 				me:setHealth(health-(mob:getHealth()/2));
-				checkForHealth();
 				createExplosion(mX, mY, 2);
 			end
 		end
@@ -238,6 +272,8 @@ function rendering()
 		for i, exp in pairs(explosions)do
 			sprite.drawCurrentSprite(explosion, exp.x, exp.y, 0, 2, 2);
 		end
+
+
 	end
 end
 
@@ -284,10 +320,10 @@ end
 		Enemy spawn
 	-------------------------------
 ]]
-local spawningTime = 3000;
+
 function spawnMob()
 	if not isGameOver then
-		if spawningTime > 1000 then
+		if spawningTime > 800 then
 			spawningTime = spawningTime - 100;
 		end
 		time.setTimerMS(spawningTimer, spawningTime);
@@ -358,7 +394,6 @@ time.setTimer(80,0,"sprite_loop");
 		Explosion
 	-------------------------------
 ]]
-local explosionTimer = time.setTimer(80, 0, "changeImageExplosion");
 
 function createExplosion(x, y, size)
 	local t = {}
@@ -384,9 +419,7 @@ function changeImageExplosion()
 			sprite.setImage(e.sprite, sprite.getImage(e.sprite)+1);
 		else
 			sprite.setImage(e.sprite, 1);
-
 			table.remove(explosions, i);
-
 		end
 	end
 
@@ -400,7 +433,12 @@ end
 ]]
 local gameover = love.graphics.newImage("files/images/gameover.png");
 local btn_retry = love.graphics.newImage("files/images/btn_retry.png");
+local btn_save = love.graphics.newImage("files/images/btn_save.png");
 local isGameOverDone = false;
+local haveTheFocus = false;
+local inputValue = "";
+
+
 function ui()
 	local screenX, screenY = system.getScreenSize();
 	-- is game over?
@@ -410,26 +448,105 @@ function ui()
 			isGameOverDone = true;
 		end
 		local pts = points:getPoints();
-		love.graphics.draw(gameover, screenX/2-100, screenY/2-100, 0, 2, 2);
-		love.graphics.print("Points: "..pts, screenX/2-50, screenY/2+50, 0, 2, 2);
+		love.graphics.draw(gameover, screenX/2-100, 100, 0, 2, 2);
+		love.graphics.setFont(f_huge);
+		love.graphics.print("Points: "..pts, screenX/2-30, 250);
+		love.graphics.setFont(f_small);
+
+		-- input
+		if pts > 0 then
+			love.graphics.setFont(f_normal);
+			love.graphics.print("Save your score... put your name here:", screenX/2-150, 300);
+			love.graphics.rectangle("fill", screenX/2-150, 320, 300, 50);
+			if haveTheFocus then
+				love.graphics.setColor(0, 102, 132, 255);
+				love.graphics.rectangle("fill", screenX/2-150, 320, 300, 5)
+				love.graphics.setColor(255,255,255,255);
+			end
+			love.graphics.setColor(0,0,0,255);
+			love.graphics.print(inputValue, screenX/2-150+5, 335);
+			love.graphics.setColor(255,255,255,255);
+			love.graphics.draw(btn_save, screenX/2-150, 380);
+			love.graphics.setFont(f_small);
+		end
+
+		love.graphics.draw(btn_retry, screenX/2-150, 440);
+
+
 	end
 end
-event.addEventHandler("onClientRender", "ui");
 
-function quitGame()
-	love.event.quit();
-end
+
 
 function lose()
-	event.removeEventHandler("onClientKey", "keyboard");
-	event.removeEventHandler("onClientRender", "rendering");
-	event.removeEventHandler("onClientUpdate", "col");
-	event.removeEventHandler("onClientUpdate", "updating");
-
-	love.audio.stop(soundtrack);
+	stopGame();
 	love.audio.play(boo);
 
-	time.setTimer(5000, 1, "quitGame");
+	if points:getPoints() > 0 then
+		event.addEventHandler("onClientCharacter", "charactering");
+		event.addEventHandler("onClientKey", "kBoard");
+		event.addEventHandler("onClientClick", "inputClick");
+	end
+
 end
 event.addEvent("onGameOver");
 event.addEventHandler("onGameOver", "lose");
+
+
+
+--[[
+	-------------------------------
+		Managing the input field of the game over screen
+	-------------------------------
+]]
+function charactering(str)
+	if isGameOver and haveTheFocus then
+		inputValue = inputValue..str;
+	end
+end
+
+function kBoard(key, state)
+	if isGameOver and haveTheFocus then
+		if key == "backspace" and state == "down" then
+			inputValue = string.sub(inputValue, 0, string.len(inputValue)-1);
+		end
+	end
+end
+
+function inputClick(button, state, x, y)
+	local screenX, screenY = system.getScreenSize();
+	if isGameOver then
+		if button == "left" and state == "down" then
+			if (x >= screenX/2-150) and (x <= screenX/2-150 + 300) and (y >= 320) and (y <= 370) then
+				haveTheFocus = true;
+			else
+				haveTheFocus = false;
+			end
+
+			if (x >= screenX/2-150) and (x <= screenX/2-150 + 300) and (y >= 380) and (y <= 380+50) then
+				-- save
+				if string.len(inputValue) > 1 then
+					local pts = points:getPoints();
+					local name = inputValue;
+					event.removeEventHandler("onClientRender", "ui");
+					scoreboard.save(tostring(name), tonumber(pts));
+					menu.setActive(true);
+					isGameOver = false;
+				end
+			elseif (x >= screenX/2-150) and (x <= screenX/2-150 + 300) and (y >= 440) and (y <= 440+50) then
+				-- retry
+				event.removeEventHandler("onClientRender", "ui");
+				isGameOver = false;
+				startGame();
+			end
+		end
+	end
+end
+
+
+function tsses()
+	if spawningTime then
+		love.graphics.print(spawningTime, 100,100);
+	end
+end
+event.addEventHandler("onClientRender", "tsses");

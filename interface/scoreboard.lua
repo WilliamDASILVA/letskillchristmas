@@ -49,10 +49,8 @@ function Scoreboard.save(name, score)
 		assert(r == 200 and data,
 		   ('Could not download file: %s')
 		      :format(host:match('/([^/]+)$')))
-		local result = json.decode(data);
-		if result['success'] == "true" then
-			return true;
-		end
+		--local result = json.decode(data);
+
 	end
 end
 

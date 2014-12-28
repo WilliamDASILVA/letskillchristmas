@@ -89,7 +89,7 @@ function MenuClick(button, state, x, y)
 			if(x >= 50) and (x <= 350) and (y >= screenY-220) and (y <= screenY-220+50) then
 				-- play
 				startGame();
-				HUD.start();
+				hud.start();
 				Menu.isActive = false;
 				love.audio.pause(Menu.soundtrack);
 				time.destroyTimer(Menu.soundTrackLooping);
@@ -98,6 +98,7 @@ function MenuClick(button, state, x, y)
 				love.event.quit();
 			elseif(x >= 50) and (x <= 350) and (y >= screenY-160) and (y <= screenY-160+50) then
 				-- scoreboard
+				hud.quit();
 				Menu.isActive = false;
 				scoreboard.new();
 			end
@@ -114,8 +115,8 @@ end
 ]]
 function Menu.start()
 	Menu.isActive = true;
-	--Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
-	--love.audio.play(Menu.soundtrack);
+	Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
+	love.audio.play(Menu.soundtrack);
 
 
 	-- creating buildings
@@ -144,6 +145,11 @@ end
 ]]
 function Menu.setActive(bool)
 	Menu.isActive = bool;
+	if bool == true then
+		hud.quit();
+		Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
+		love.audio.play(Menu.soundtrack);
+	end
 end
 
 function MenuSoundtrackLooping()
