@@ -19,15 +19,15 @@ function Event.addEvent(eventName)
 	if eventName then
 		for i, e in ipairs(Event.events)do
 			if e.name == eventName then
-				return false;
+				return;
 			end
 		end
 
-		local e = {}
-		e.name = eventName;
-		e.functions = {}
+		local k = {}
+		k.name = eventName;
+		k.functions = {}
 
-		table.insert(Event.events, e);
+		table.insert(Event.events, k);
 
 		return true;
 	else
@@ -90,9 +90,9 @@ function Event.removeEventHandler(eventName, functionCalled)
 	if eventName and functionCalled then
 		for i, e in ipairs(Event.events)do
 			if eventName == e.name  then
-				for i, func in ipairs(e.functions)do
+				for k, func in ipairs(e.functions)do
 					if tostring(functionCalled) == func then
-						table.remove(Event.events, i);
+						table.remove(Event.events[i].functions, k);
 					end
 				end
 			end
