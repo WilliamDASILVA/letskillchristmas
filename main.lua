@@ -110,9 +110,7 @@ function startGame()
 	soundtLoop = time.setTimer(5400, 0, "soundTrackLoop");
 	enemyShootingTimer = time.setTimer(1500, 0, "enemyShooting");
 	spritesLoop = time.setTimer(80,0,"sprite_loop");
-	pickupSpawn = time.setTimer(10000, 0, "pickupSpawning");
-
-	menu.quit();
+	pickupSpawn = time.setTimer(25000, 0, "pickupSpawning");
 
 end
 
@@ -141,6 +139,7 @@ function stopGame()
 	time.destroyTimer(explosionTimer);
 	time.destroyTimer(enemyShootingTimer);
 	time.destroyTimer(spritesLoop);
+	time.destroyTimer(pickupSpawn);
 
 end
 
@@ -291,7 +290,7 @@ function col()
 				local bX, bY = bullet:getPosition();
 				local mX, mY = me:getPosition();
 
-				if isRectangleInRectangle(bX, bY, 10,10, mX, mY, 50, 50) then
+				if isRectangleInRectangle(bX, bY, 20,20, mX, mY, 50, 50) then
 					local dmg = bullet:getDamage();
 					local health = me:getHealth();
 					me:setHealth(health - dmg);
@@ -480,7 +479,7 @@ function enemyShoot(mb)
 
 		if getDistanceBetweenPoints2D(x, y, pX, pY) >= 500 then
 
-			local b = bullet.new(x, y, "sugarcane", "left", 5);
+			local b = bullet.new(x, y, "lutin", "left", 5);
 			b:isTargeted(true);
 			b:setTargetPosition(pX, pY);
 			b:setSource("mob");
@@ -723,6 +722,7 @@ function inputClick(button, state, x, y)
 					event.removeEventHandler("onClientRender", "ui");
 
 					scoreboard.save(name, pts);
+					hud.quit();
 					menu.open();
 					isGameOver = false;
 				end
@@ -737,12 +737,14 @@ end
 --[[
 function tsses()
 	local k = 0;
-	for i, e in ipairs(event.events)do
-		for i, func in ipairs(e.functions)do
-			k = k +1;
-			love.graphics.print(func, 500, 100+k*15);
-		end
-	end
+	--for i, e in ipairs(event.events)do
+	--	for i, func in ipairs(e.functions)do
+	--		k = k +1;
+			for i, t in ipairs(time.timers)do
+				love.graphics.print(t.functionToCall, 500, 100+i*15);
+			end
+	--	end
+	--end
 end
 event.addEventHandler("onClientRender", "tsses");
 ]]

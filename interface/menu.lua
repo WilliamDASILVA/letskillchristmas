@@ -85,8 +85,8 @@ end
 			Return: nil
 ]]
 function Menu.start()
-	Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
 	love.audio.play(Menu.soundtrack);
+	Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
 
 
 	-- creating buildings
@@ -105,6 +105,10 @@ function Menu.start()
 	event.addEventHandler("onClientUpdate", "MenuUpdating");
 	event.addEventHandler("onClientRender", "MenuRender2");
 	event.addEventHandler("onClientClick", "MenuClick");
+end
+
+function MenuSoundtrackLooping()
+	love.audio.play(Menu.soundtrack);
 end
 
 
@@ -160,8 +164,7 @@ function MenuClick(button, state, x, y)
 			-- play
 			startGame();
 			hud.start();
-			love.audio.pause(Menu.soundtrack);
-			time.destroyTimer(Menu.soundTrackLooping);
+			Menu.destroy();
 		elseif(x >= 50) and (x <= 350) and (y >= screenY-100) and (y <= screenY-100+50) then
 			-- quit
 			love.event.quit();
