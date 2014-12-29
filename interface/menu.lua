@@ -42,7 +42,7 @@ end
 	
 			Return: nil
 ]]
-function MenuRender()
+function MenuRender1()
 	local screenX, screenY = system.getScreenSize();
 
 	-- drawing background
@@ -60,6 +60,10 @@ function MenuRender()
 
 	end
 	love.graphics.setColor(255,255,255,255);
+
+end
+function MenuRender2()
+	local screenX, screenY = system.getScreenSize();
 
 	if Menu.isActive then
 		love.graphics.draw(Menu.logo, screenX/4-(575/4), 100, 0, 0.5, 0.5);
@@ -131,7 +135,8 @@ function Menu.start()
 		table.insert(Menu.buildings, t);
 	end
 
-	event.addEventHandler("onClientRender", "MenuRender");
+	event.addEventHandler("onClientRender", "MenuRender1");
+	event.addEventHandler("onClientRender", "MenuRender2");
 	event.addEventHandler("onClientUpdate", "MenuUpdating");
 	event.addEventHandler("onClientClick", "MenuClick");
 end
@@ -149,6 +154,8 @@ function Menu.setActive(bool)
 		hud.quit();
 		Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
 		love.audio.play(Menu.soundtrack);
+		event.addEventHandler("onClientRender", "MenuRender2");
+		event.addEventHandler("onClientClick", "MenuClick");
 	end
 end
 
@@ -157,7 +164,22 @@ function MenuSoundtrackLooping()
 end
 
 
+--[[
+			[function] Menu.quit()
+	
+			* Quit the mennu *
+	
+			Return: nil
+]]
+function Menu.quit()
+	Menu.isActive = false
 
+	time.destroyTimer(Menu.soundTrackLooping);
+	love.audio.pause(Menu.soundtrack);
+
+	event.removeEventHandler("onClientRender", "MenuRender2");
+	event.removeEventHandler("onClientClick", "MenuClick");
+end
 
 
 

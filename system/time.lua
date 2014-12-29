@@ -82,7 +82,7 @@ end
 	
 			Return: nil
 ]]
-function timers()
+function TimersUpdate()
 	for i, timer in ipairs(Time.timers)do
 		local theTime = love.timer.getTime()*1000;
 		if timer.ms <= (theTime - timer.currentTime) then
@@ -107,7 +107,7 @@ end
 		Events
 	-------------------------------
 ]]
-event.addEventHandler("onClientUpdate", "timers");
+event.addEventHandler("onClientUpdate", "TimersUpdate");
 
 
 return Time;

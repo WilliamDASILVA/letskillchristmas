@@ -96,7 +96,7 @@ end
 	
 			Return: nil
 ]]
-function drawing()
+function DebugRender()
 	for i, v in ipairs(Debug.errors)do
 		love.graphics.print(v.content, v.range*10,v.line*12)
 	end
@@ -106,7 +106,7 @@ function drawing()
 	end
 end
 
-event.addEventHandler("onClientRender", "drawing");
+event.addEventHandler("onClientRender", "DebugRender");
 
 --[[
 	-------------------------------

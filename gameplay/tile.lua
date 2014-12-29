@@ -216,7 +216,7 @@ function tileRendering()
 	end
 end
 
-event.addEventHandler("onClientRender", "tileRendering");
+--event.addEventHandler("onClientRender", "tileRendering");
 
 
 return Tile;
