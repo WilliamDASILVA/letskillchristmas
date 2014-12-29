@@ -63,6 +63,9 @@ function Scoreboard.quit()
 	Scoreboard.setVisible(false);
 	Scoreboard.scores = {};
 	time.destroyTimer(Scoreboard.trophyTimer);
+
+	event.removeEventHandler("onClientClick", "ScoreboardClick");
+	event.removeEventHandler("onClientRender", "ScoreboardRender");
 end
 
 --[[
@@ -146,7 +149,7 @@ function ScoreboardClick(button, state, x, y)
 		if(button == "left") and (state == "down") then
 			if (x >= screenX/2-150) and (x <= screenX/2-150+300) and (y >= screenY/2+200) and (y <= screenY/2+200+50) then
 				Scoreboard.quit();
-				Menu.setActive(true);
+				menu.open();
 			end
 		end
 	end

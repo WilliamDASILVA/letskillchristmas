@@ -5,7 +5,6 @@
 ]]
 
 Menu = {}
-Menu.isActive = false;
 Menu.buildings = {}
 Menu.sun_image = love.graphics.newImage("files/images/sun.png");
 Menu.infos = love.graphics.newImage("files/images/menu_tip.png");
@@ -65,50 +64,18 @@ end
 function MenuRender2()
 	local screenX, screenY = system.getScreenSize();
 
-	if Menu.isActive then
-		love.graphics.draw(Menu.logo, screenX/4-(575/4), 100, 0, 0.5, 0.5);
-		love.graphics.draw(Menu.infos, screenX-300, screenY-300);
-		love.graphics.print("© William DA SILVA - www.williamdasilva.fr", 50, screenY-45);
+	love.graphics.draw(Menu.logo, screenX/4-(575/4), 100, 0, 0.5, 0.5);
+	love.graphics.draw(Menu.infos, screenX-300, screenY-300);
+	love.graphics.print("© William DA SILVA - www.williamdasilva.fr", 50, screenY-45);
 
-		-- drawing buttons
-		love.graphics.draw(Menu.btn_play, 50, screenY-220);
-		love.graphics.draw(Menu.btn_score, 50, screenY-160);
-		love.graphics.draw(Menu.btn_quit, 50, screenY-100);
+	-- drawing buttons
+	love.graphics.draw(Menu.btn_play, 50, screenY-220);
+	love.graphics.draw(Menu.btn_score, 50, screenY-160);
+	love.graphics.draw(Menu.btn_quit, 50, screenY-100);
 
-	end
 
 end
 
---[[
-			[function] MenuClick()
-	
-			* When click *
-	
-			Return: nil
-]]
-function MenuClick(button, state, x, y)
-	if Menu.isActive then
-		local screenX, screenY = system.getScreenSize();
-		if (button == "left") and (state == "down") then
-			if(x >= 50) and (x <= 350) and (y >= screenY-220) and (y <= screenY-220+50) then
-				-- play
-				startGame();
-				hud.start();
-				Menu.isActive = false;
-				love.audio.pause(Menu.soundtrack);
-				time.destroyTimer(Menu.soundTrackLooping);
-			elseif(x >= 50) and (x <= 350) and (y >= screenY-100) and (y <= screenY-100+50) then
-				-- quit
-				love.event.quit();
-			elseif(x >= 50) and (x <= 350) and (y >= screenY-160) and (y <= screenY-160+50) then
-				-- scoreboard
-				hud.quit();
-				Menu.isActive = false;
-				scoreboard.new();
-			end
-		end
-	end
-end
 
 --[[
 			[function] Menu.start()
@@ -118,7 +85,6 @@ end
 			Return: nil
 ]]
 function Menu.start()
-	Menu.isActive = true;
 	Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
 	love.audio.play(Menu.soundtrack);
 
@@ -136,49 +102,76 @@ function Menu.start()
 	end
 
 	event.addEventHandler("onClientRender", "MenuRender1");
-	event.addEventHandler("onClientRender", "MenuRender2");
 	event.addEventHandler("onClientUpdate", "MenuUpdating");
+	event.addEventHandler("onClientRender", "MenuRender2");
+	event.addEventHandler("onClientClick", "MenuClick");
+end
+
+
+--[[
+			[function] Menu.close()
+	
+			* Close the menu tempo *
+	
+			Return: nil
+]]
+function Menu.close()
+	event.removeEventHandler("onClientRender", "MenuRender2");
+	event.removeEventHandler("onClientClick", "MenuClick");
+end
+
+--[[
+			[function] Menu.open()
+	
+			*  *
+	
+			Return: 
+]]
+function Menu.open()
+	event.addEventHandler("onClientRender", "MenuRender2");
 	event.addEventHandler("onClientClick", "MenuClick");
 end
 
 --[[
-			[function] Menu.setActive(bool)
+			[function] Menu.destroy()
 	
-			* Set menu active *
-	
-			Return: nil
-]]
-function Menu.setActive(bool)
-	Menu.isActive = bool;
-	if bool == true then
-		hud.quit();
-		Menu.soundTrackLooping = time.setTimer(12720, 0, "MenuSoundtrackLooping");
-		love.audio.play(Menu.soundtrack);
-		event.addEventHandler("onClientRender", "MenuRender2");
-		event.addEventHandler("onClientClick", "MenuClick");
-	end
-end
-
-function MenuSoundtrackLooping()
-	love.audio.play(Menu.soundtrack);
-end
-
-
---[[
-			[function] Menu.quit()
-	
-			* Quit the mennu *
+			* Destroy the menu *
 	
 			Return: nil
 ]]
-function Menu.quit()
-	Menu.isActive = false
-
+function Menu.destroy()
 	time.destroyTimer(Menu.soundTrackLooping);
 	love.audio.pause(Menu.soundtrack);
 
-	event.removeEventHandler("onClientRender", "MenuRender2");
-	event.removeEventHandler("onClientClick", "MenuClick");
+	Menu.close();
+end
+
+--[[
+			[function] MenuClick()
+	
+			* When click *
+	
+			Return: nil
+]]
+function MenuClick(button, state, x, y)
+	local screenX, screenY = system.getScreenSize();
+	if (button == "left") and (state == "down") then
+		if(x >= 50) and (x <= 350) and (y >= screenY-220) and (y <= screenY-220+50) then
+			-- play
+			startGame();
+			hud.start();
+			love.audio.pause(Menu.soundtrack);
+			time.destroyTimer(Menu.soundTrackLooping);
+		elseif(x >= 50) and (x <= 350) and (y >= screenY-100) and (y <= screenY-100+50) then
+			-- quit
+			love.event.quit();
+		elseif(x >= 50) and (x <= 350) and (y >= screenY-160) and (y <= screenY-160+50) then
+			-- scoreboard
+			hud.quit();
+			scoreboard.new();
+			Menu.close();
+		end
+	end
 end
 
 

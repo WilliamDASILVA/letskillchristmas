@@ -480,7 +480,7 @@ function enemyShoot(mb)
 
 		if getDistanceBetweenPoints2D(x, y, pX, pY) >= 500 then
 
-			local b = bullet.new(x, y, "lutin", "left", 5);
+			local b = bullet.new(x, y, "sugarcane", "left", 5);
 			b:isTargeted(true);
 			b:setTargetPosition(pX, pY);
 			b:setSource("mob");
@@ -721,9 +721,9 @@ function inputClick(button, state, x, y)
 					local pts = points:getPoints();
 					local name = inputValue;
 					event.removeEventHandler("onClientRender", "ui");
-					
+
 					scoreboard.save(name, pts);
-					menu.setActive(true);
+					menu.open();
 					isGameOver = false;
 				end
 			elseif (x >= screenX/2-150) and (x <= screenX/2-150 + 300) and (y >= 440) and (y <= 440+50) then
@@ -734,3 +734,15 @@ function inputClick(button, state, x, y)
 		end
 	end
 end
+--[[
+function tsses()
+	local k = 0;
+	for i, e in ipairs(event.events)do
+		for i, func in ipairs(e.functions)do
+			k = k +1;
+			love.graphics.print(func, 500, 100+k*15);
+		end
+	end
+end
+event.addEventHandler("onClientRender", "tsses");
+]]
